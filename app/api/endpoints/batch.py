@@ -8,8 +8,10 @@ from app.schemas.requests import BatchRequest
 from app.schemas.responses import GenerateResponse, BatchStatusResponse
 from workers.tasks import generate_sar_task
 from app.core.redis_client import redis_client
+from app.core.security import verify_api_key, rate_limit_standard
+from fastapi import Depends
 
-router = APIRouter()
+router = APIRouter(dependencies=[verify_api_key, rate_limit_standard])
 
 @router.post("/generate", response_model=GenerateResponse)
 async def submit_batch(request: BatchRequest):

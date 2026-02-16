@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     # OLLAMA
     OLLAMA_BASE_URL: str
+    API_KEY: str = "barclays-hackathon-secret-key"
     
     # CORS
     ALLOWED_ORIGINS: List[AnyHttpUrl] = []

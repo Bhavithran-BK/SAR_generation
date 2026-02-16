@@ -1,5 +1,10 @@
-# Start Celery Worker (Windows requires pool=solo for reload validation usually, but threads/processes work too. Solo is safest for dev)
-start "Celery Worker" cmd /k ".\venv\Scripts\celery -A workers.celery_worker.celery_app worker --loglevel=info --pool=solo"
+@echo off
+:: Set PYTHONPATH to current directory so 'app' module is found
+set PYTHONPATH=.
 
-# Start Flower
-start "Flower Monitor" cmd /k ".\venv\Scripts\celery -A workers.celery_worker.celery_app flower"
+:: Start Celery Worker
+:: Using solo pool for reliable Windows development behavior
+start "Celery Worker" cmd /k ".\venv\Scripts\celery -A app.core.celery_app worker --loglevel=info --pool=solo -n worker1@barclays"
+
+:: Start Flower (Optional Monitoring)
+start "Celery Flower" cmd /k ".\venv\Scripts\celery -A app.core.celery_app flower --port=5555"

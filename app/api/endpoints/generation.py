@@ -3,8 +3,10 @@ from celery.result import AsyncResult
 from app.schemas.requests import GenerateRequest
 from app.schemas.responses import GenerateResponse, JobStatusResponse, SARResponse
 from workers.tasks import generate_sar_task
+from app.core.security import verify_api_key, rate_limit_standard
+from fastapi import Depends
 
-router = APIRouter()
+router = APIRouter(dependencies=[verify_api_key, rate_limit_standard])
 
 @router.post("/generate", response_model=GenerateResponse)
 async def generate_sar(request: GenerateRequest):
