@@ -2,6 +2,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.api.endpoints import generation, batch
+# Ensure configs are loaded
+import app.core.configs.india 
 
 # Placeholder for future initialization
 @asynccontextmanager
@@ -30,6 +33,9 @@ if settings.ALLOWED_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+app.include_router(generation.router, prefix="/api/v1/generation", tags=["Generation"])
+app.include_router(batch.router, prefix="/api/v1/batch", tags=["Batch Processing"])
 
 @app.get("/health")
 async def health_check():

@@ -1,0 +1,49 @@
+# SUSPICIOUS TRANSACTION REPORT (STR) - {{ config.regulator_name }}
+
+**Report Date:** {{ date }}
+**Reference ID:** {{ sar_id }}
+
+## 1. REPORTING ENTITY DETAILS
+* **Bank Name:** Barclays Bank (India)
+* **Branch:** {{ request.region }} Region
+
+## 2. CUSTOMER DETAILS
+* **Name:** {{ request.customer.name }}
+* **Customer ID:** {{ request.customer.customer_id }}
+* **Account Number:** {{ request.customer.account_number }}
+* **Risk Rating:** {{ request.customer.risk_rating }}
+* **KYC Status:** {{ request.customer.kyc_status }}
+
+## 3. SUSPICIOUS ACTIVITY SUMMARY
+* **Primary Typology:** {{ request.typology or "Unknown" }}
+* **Total Value:** {{ analysis.total_volume | currency(config.currency_symbol) }}
+* **Transaction Count:** {{ analysis.txn_count }}
+
+---
+
+## 4. NARRATIVE
+
+### Introduction
+{{ narrative_sections.introduction }}
+
+### Transaction Analysis
+{{ narrative_sections.transaction_analysis }}
+
+### Suspicion Details
+Following alerts were triggered based on {{ config.regulator_name }} guidelines:
+{% for alert in request.alerts %}
+- **{{ alert.rule_name }}** (Severity: {{ alert.severity }}): {{ alert.details }}
+{% endfor %}
+
+{% if analysis.structuring %}
+**Detected Structuring (Smurfing):**
+{% for item in analysis.structuring %}
+- Transaction {{ item.transaction_id }}: {{ item.reason }}
+{% endfor %}
+{% endif %}
+
+### Conclusion
+{{ narrative_sections.conclusion }}
+
+---
+*Report generated automatically by AI System. Verified by Compliance Officer.*
