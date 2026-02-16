@@ -1,0 +1,22 @@
+from datetime import datetime
+from typing import List, Optional, Any
+from pydantic import BaseModel
+
+class SARResponse(BaseModel):
+    sar_id: str
+    content: str
+    sections: dict
+    generated_at: datetime
+    status: str
+
+class GenerateResponse(BaseModel):
+    job_id: str
+    status: str
+    message: str
+
+class JobStatusResponse(BaseModel):
+    job_id: str
+    status: str
+    progress: int
+    result: Optional[SARResponse] = None
+    error: Optional[str] = None

@@ -1,0 +1,45 @@
+{
+  "customer": {
+    "customer_id": "CUST-88392",
+    "name": "Wayne Enterprises Ltd",
+    "email": "finance@wayne.com",
+    "account_number": "ACC-9928-1123",
+    "risk_rating": "HIGH",
+    "kyc_status": "VERIFIED"
+  },
+  "transactions": [
+    {
+      "transaction_id": "TXN-1001",
+      "amount": 45000.00,
+      "currency": "USD",
+      "timestamp": "2023-10-25T14:30:00Z",
+      "sender_account": "ACC-9928-1123",
+      "receiver_account": "ACC-5555-6666",
+      "description": "Consulting Services Payment",
+      "transaction_type": "WIRE"
+    },
+    {
+      "transaction_id": "TXN-1002",
+      "amount": 48000.00,
+      "currency": "USD",
+      "timestamp": "2023-10-26T09:15:00Z",
+      "sender_account": "ACC-9928-1123",
+      "receiver_account": "ACC-5555-6666",
+      "description": "Consulting Services Payment 2",
+      "transaction_type": "WIRE"
+    }
+  ],
+  "alerts": [
+    {
+      "alert_id": "ALT-5521",
+      "rule_name": "Rapid Movement of Funds",
+      "severity": "HIGH",
+      "timestamp": "2023-10-26T10:00:00Z",
+      "details": {
+        "reason": "Two large transactions aggregating to > $10k within 24 hours"
+      }
+    }
+  ],
+  "region": "US",
+  "typology": "Structuring"
+}
