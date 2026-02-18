@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAR Generator - Multi-Simulation Dashboard</title>
+    <title>SAR Generator - Compliance Portal</title>
     <style>
         :root {
             --barclays-blue: #00AEEF;
@@ -17,16 +17,188 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
+            padding: 0;
+            background: #f4f7f6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--barclays-dark);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: 350px;
+            color: #333;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-box h2 {
+            margin-top: 0;
+            color: var(--barclays-dark);
+            text-align: center;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        /* Layout */
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .content-area {
+            flex: 1;
             padding: 20px;
-            background: #f0f2f5;
+            overflow-y: auto;
+            transition: margin-right 0.3s;
+        }
+
+        /* Sidebar Panel */
+        .side-panel {
+            width: 0;
+            background: white;
+            border-left: 1px solid #ddd;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            transition: width 0.3s;
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100%;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.open {
+            width: 500px;
+        }
+
+        .panel-header {
+            background: var(--barclays-dark);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .close-panel {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: white;
+            background: none;
+            border: none;
+        }
+
+        .panel-content {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .panel-section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .panel-section h3 {
+            margin-top: 0;
+            color: var(--barclays-blue);
+            font-size: 1rem;
+            border-bottom: 2px solid var(--barclays-blue);
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: bold;
             color: #333;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        /* Transaction List */
+        .tx-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
+        .tx-item {
+            padding: 10px;
+            border: 1px solid #eee;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            background: #fafafa;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            cursor: pointer;
+        }
+
+        .tx-item:hover {
+            background: #f0f8ff;
+        }
+
+        .tx-item.p-high {
+            border-left: 4px solid var(--danger-red);
+        }
+
+        .tx-details {
+            flex-grow: 1;
+        }
+
+        .tx-amount {
+            font-weight: bold;
+            display: block;
+        }
+
+        .tx-date {
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        /* General UI */
         header {
             display: flex;
             justify-content: space-between;
@@ -39,186 +211,72 @@
         h1 {
             color: var(--barclays-dark);
             margin: 0;
-            font-size: 2.5rem;
-        }
-
-        .config-panel {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            display: flex;
-            gap: 20px;
-            align-items: flex-end;
-        }
-
-        .form-group {
-            flex: 1;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        button.primary {
-            background: var(--barclays-dark);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        button.primary:hover {
-            background: #00568c;
+            font-size: 2.2rem;
         }
 
         .simulation-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
 
         .sim-card {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 20px;
             transition: transform 0.2s;
             border: 1px solid #eee;
         }
 
         .sim-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .sim-header {
-            padding: 15px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #eee;
+        .card-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            margin-bottom: 15px;
         }
 
-        .sim-header h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: var(--barclays-dark);
-        }
-
-        .region-badge {
-            background: #e1f5fe;
-            color: #01579b;
+        .badge {
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: bold;
         }
 
-        .sim-body {
-            padding: 15px;
-            flex-grow: 1;
-        }
-
-        .sim-data-preview {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 15px;
-            height: 100px;
-            overflow-y: auto;
-            background: #fafafa;
-            padding: 10px;
-            border-radius: 6px;
-            font-family: monospace;
-            border: 1px inset #eee;
-        }
-
-        .sim-footer {
-            padding: 15px;
-            border-top: 1px solid #eee;
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-run {
-            flex: 1;
-            padding: 10px;
-            border-radius: 6px;
-            border: none;
+        .btn {
             background: var(--barclays-blue);
             color: white;
-            font-weight: bold;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
         }
 
-        .btn-run:disabled {
+        .btn:hover:not(:disabled) {
+            background: #009cd6;
+        }
+
+        .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
         }
 
-        .status-tray {
+        .btn-panel {
+            margin-top: auto;
+            border-top: 1px solid #ccc;
             padding: 15px;
-            display: none;
-            border-top: 2px solid #eee;
+            background: #f9f9f9;
         }
 
-        .progress-bar {
-            height: 8px;
-            background: #eee;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--barclays-blue);
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .status-text {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #555;
-        }
-
-        .result-viewer {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            height: 80%;
-            background: white;
-            z-index: 1000;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            padding: 30px;
-            overflow-y: auto;
-        }
-
+        /* Overlays */
         .overlay {
             display: none;
             position: fixed;
@@ -227,302 +285,427 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            z-index: 101;
         }
 
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            cursor: pointer;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        pre {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            white-space: pre-wrap;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .btn-view {
+        .modal {
             display: none;
-            background: var(--success-green);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            width: 85%;
+            height: 90%;
+            z-index: 102;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #edit-area {
+            flex-grow: 1;
+            margin: 15px 0;
+            padding: 25px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            resize: none;
+            background: #fdfdfd;
+            white-space: pre-wrap;
+            color: #2c3e50;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            background: none;
             border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #666;
             cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--barclays-dark);
+            border-bottom: 3px solid var(--barclays-blue);
             font-weight: bold;
-            font-size: 0.9rem;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>SAR Gen <span style="font-weight: 300; color: var(--barclays-blue);">Dashboard</span></h1>
-            <div style="text-align: right;">
-                <span id="connection-status" style="font-size: 0.8rem; color: var(--danger-red);">● Backend
-                    Offline</span>
-            </div>
-        </header>
 
-        <div class="config-panel">
-            <div class="form-group">
-                <label>API Endpoint</label>
-                <input type="text" id="api-url" value="http://localhost:8000/api/v1">
-            </div>
-            <div class="form-group">
-                <label>Developer Key</label>
-                <input type="password" id="api-key" value="barclays-hackathon-secret-key">
-            </div>
-            <button class="primary" onclick="runAllSimulations()">Run All Scenarios</button>
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div style="margin-bottom: 20px; text-align: center;">
+            <h1 style="color: white; border:none; margin-bottom:5px;">BARCLAYS</h1>
+            <div style="font-size: 1.2rem; opacity: 0.8;">Compliance Audit System</div>
         </div>
-
-        <div class="simulation-grid" id="sim-grid">
-            <!-- Simulation Cards will be injected here -->
+        <div class="login-box">
+            <h2>Sign In</h2>
+            <input type="text" id="username" placeholder="Username (officer or auditor)" value="officer">
+            <input type="password" id="password" placeholder="Password" value="password">
+            <button class="btn" onclick="handleLogin()">Login</button>
+            <div style="margin-top: 15px; font-size: 0.8rem; color: #777; text-align: center;">
+                Use <b>officer</b> or <b>auditor</b> to sign in.
+            </div>
         </div>
     </div>
 
-    <div class="overlay" id="overlay" onclick="closeResult()"></div>
-    <div class="result-viewer" id="result-viewer">
-        <span class="close-btn" onclick="closeResult()">&times;</span>
-        <h2 id="result-title">Generated Report</h2>
-        <div id="result-content"></div>
+    <div class="main-container">
+        <div class="content-area">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <header>
+                    <h1>SAR <span style="font-weight: 300; color: var(--barclays-blue);">Audit Workflow</span></h1>
+                    <div style="display:flex; gap:20px; align-items:center;">
+                        <div id="role-badge" class="badge" style="background:var(--barclays-blue); color:white;">OFFICER
+                        </div>
+                        <button onclick="handleLogout()"
+                            style="background:none; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">Logout</button>
+                    </div>
+                </header>
+
+                <div class="tabs" id="main-tabs">
+                    <button class="tab active" data-role="OFFICER" onclick="switchTab('discovery')">Case
+                        Discovery</button>
+                    <button class="tab" data-role="AUDITOR" onclick="switchTab('audit-queue')">Audit Queue</button>
+                    <button class="tab" onclick="switchTab('history')">Submitted History</button>
+                </div>
+
+                <!-- Views -->
+                <div id="view-discovery" class="view-section">
+                    <div id="sim-grid" class="simulation-grid"></div>
+                </div>
+
+                <div id="view-audit-queue" class="view-section" style="display:none;">
+                    <div id="audit-list" class="history-list"></div>
+                </div>
+
+                <div id="view-history" class="view-section" style="display:none;">
+                    <div id="history-list" class="history-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="side-panel" id="side-panel">
+            <div class="panel-header">
+                <h2 id="panel-title">Case Investigation</h2>
+                <button class="close-panel" onclick="closePanel()">×</button>
+            </div>
+            <div class="panel-content" id="panel-details"></div>
+            <div class="btn-panel" id="action-panel" style="display:none;">
+                <div id="generation-status"
+                    style="margin-bottom:10px; font-weight:bold; font-size:0.9rem; text-align:center;"></div>
+                <button class="btn" id="btn-generate" onclick="triggerGeneration()">Generate AI Report</button>
+            </div>
+        </div>
     </div>
 
-    <script src="../sdk/js/sar_client.js"></script>
+    <!-- Modal -->
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="modal" id="review-modal" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="modal-title">Report Review</h2>
+            <button onclick="closeModal()"
+                style="background:none; border:none; font-size:1.5rem; cursor:pointer;">×</button>
+        </div>
+        <div id="modal-desc" style="color:#666; font-size:0.9rem; margin-bottom:10px;"></div>
+
+        <div id="audit-trail"
+            style="background:#f8f9fa; padding:10px; border-radius:4px; font-size:0.8rem; display:none; margin-bottom:10px;">
+        </div>
+
+        <textarea id="edit-area"></textarea>
+
+        <div id="modal-actions" style="display:flex; gap:15px; justify-content:flex-end;"></div>
+    </div>
+
     <script>
-        const scenarios = [
-            {
-                id: 1,
-                name: "Mumbai High Value Trade",
-                region: "IND",
-                typology: "Large Cash Deposit",
-                data: {
-                    customer: {
-                        customer_id: "IN-CUST-101",
-                        name: "Mumbai Trading Co",
-                        risk_rating: "HIGH",
-                        account_number: "IN-882299",
-                        kyc_status: "VERIFIED"
-                    },
-                    transactions: [{
-                        transaction_id: "TXN-001",
-                        amount: 1200000,
-                        currency: "INR",
-                        timestamp: new Date().toISOString(),
-                        sender_account: "IN-882299",
-                        receiver_account: "CASH-OUT",
-                        transaction_type: "CASH_DEPOSIT"
-                    }],
-                    alerts: [{
-                        alert_id: "ALT-001",
-                        rule_name: "High Value Cash",
-                        severity: "CRITICAL",
-                        timestamp: new Date().toISOString(),
-                        details: { msg: "Transaction exceeds 10 Lakh limit" }
-                    }],
-                    region: "IND",
-                    typology: "Large Cash Deposit"
-                }
-            },
-            {
-                id: 2,
-                name: "Bangalore Tech Smurfing",
-                region: "IND",
-                typology: "Structuring",
-                data: {
-                    customer: {
-                        customer_id: "IN-CUST-202",
-                        name: "Anand Sharma",
-                        risk_rating: "MEDIUM",
-                        account_number: "IN-773311",
-                        kyc_status: "VERIFIED"
-                    },
-                    transactions: [
-                        { transaction_id: "TXN-002", amount: 95000, currency: "INR", timestamp: new Date().toISOString(), sender_account: "IN-773311", receiver_account: "ATM-BLR", transaction_type: "ATM_WITHDRAWAL" },
-                        { transaction_id: "TXN-003", amount: 96000, currency: "INR", timestamp: new Date().toISOString(), sender_account: "IN-773311", receiver_account: "ATM-BLR", transaction_type: "ATM_WITHDRAWAL" },
-                        { transaction_id: "TXN-004", amount: 94000, currency: "INR", timestamp: new Date().toISOString(), sender_account: "IN-773311", receiver_account: "ATM-BLR", transaction_type: "ATM_WITHDRAWAL" }
-                    ],
-                    alerts: [{
-                        alert_id: "ALT-002",
-                        rule_name: "Structuring Pattern",
-                        severity: "HIGH",
-                        timestamp: new Date().toISOString(),
-                        details: { pattern: "Rapid consecutive ATM withdrawals near limit" }
-                    }],
-                    region: "IND",
-                    typology: "Structuring (Smurfing)"
-                }
-            },
-            {
-                id: 3,
-                name: "Delhi NGO Rapid Transfer",
-                region: "IND",
-                typology: "Rapid Movement",
-                data: {
-                    customer: {
-                        customer_id: "IN-CUST-303",
-                        name: "SafeHands Foundation",
-                        risk_rating: "HIGH",
-                        account_number: "IN-665544",
-                        kyc_status: "VERIFIED"
-                    },
-                    transactions: [
-                        { transaction_id: "TXN-005", amount: 500000, currency: "INR", timestamp: new Date().toISOString(), sender_account: "EXT-WIRE", receiver_account: "IN-665544", transaction_type: "NEFT" },
-                        { transaction_id: "TXN-006", amount: 495000, currency: "INR", timestamp: new Date().toISOString(), sender_account: "IN-665544", receiver_account: "OFFSHORE-ACC", transaction_type: "WIRE" }
-                    ],
-                    alerts: [{
-                        alert_id: "ALT-003",
-                        rule_name: "Rapid In-Out",
-                        severity: "HIGH",
-                        timestamp: new Date().toISOString(),
-                        details: { timeframe: "Same day transfer" }
-                    }],
-                    region: "IND",
-                    typology: "Terrorist Financing Indicators"
-                }
-            }
-        ];
+        let currentUser = null;
+        let currentCase = null;
+        let selectedTxIds = new Set();
+        let activeSarId = null;
 
-        const activeJobs = new Map();
+        const API_URL = "http://localhost:8000/api/v1";
+        const API_KEY = "barclays-hackathon-secret-key";
+
+        // --- AUTH ---
+        async function handleLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+
+                if (!res.ok) throw new Error("Invalid login");
+
+                currentUser = await res.json();
+                document.getElementById('login-overlay').style.display = 'none';
+                initDashboard();
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('login-overlay').style.display = 'flex';
+        }
 
         function initDashboard() {
-            const grid = document.getElementById('sim-grid');
-            scenarios.forEach(scenario => {
-                const card = document.createElement('div');
-                card.className = 'sim-card';
-                card.id = `card-${scenario.id}`;
-                card.innerHTML = `
-                    <div class="sim-header">
-                        <h3>${scenario.name}</h3>
-                        <span class="region-badge">${scenario.region}</span>
-                    </div>
-                    <div class="sim-body">
-                        <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">Typology: ${scenario.typology}</div>
-                        <div class="sim-data-preview">${JSON.stringify(scenario.data, null, 2)}</div>
-                        <div class="status-tray" id="tray-${scenario.id}">
-                            <div class="status-text" id="status-text-${scenario.id}">Pre-validation...</div>
-                            <div class="progress-bar"><div class="progress-fill" id="progress-${scenario.id}"></div></div>
-                        </div>
-                    </div>
-                    <div class="sim-footer">
-                        <button class="btn-run" id="btn-run-${scenario.id}" onclick="runSimulation(${scenario.id})">Generate SAR</button>
-                        <button class="btn-view" id="btn-view-${scenario.id}" onclick="viewResult(${scenario.id})">View Result</button>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-            checkBackend();
-        }
-
-        async function checkBackend() {
-            const baseUrl = document.getElementById('api-url').value;
-            const indicator = document.getElementById('connection-status');
-            try {
-                const res = await fetch(`${baseUrl.replace('/api/v1', '')}/health`);
-                if (res.ok) {
-                    indicator.innerHTML = "● Backend Online";
-                    indicator.style.color = "var(--success-green)";
+            document.getElementById('role-badge').innerText = currentUser.role;
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => {
+                const role = t.getAttribute('data-role');
+                if (role && role !== currentUser.role) {
+                    t.style.display = 'none';
+                } else {
+                    t.style.display = 'block';
                 }
-            } catch (e) {
-                indicator.innerHTML = "● Backend Offline";
-                indicator.style.color = "var(--danger-red)";
+            });
+
+            if (currentUser.role === 'OFFICER') {
+                switchTab('discovery');
+            } else {
+                switchTab('audit-queue');
             }
         }
 
-        async function runSimulation(id) {
-            const scenario = scenarios.find(s => s.id === id);
-            const baseUrl = document.getElementById('api-url').value;
-            const apiKey = document.getElementById('api-key').value;
+        // --- TABS ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            const activeTab = Array.from(document.querySelectorAll('.tab')).find(t => t.innerText.toLowerCase().includes(tabName.split('-')[0]));
+            if (activeTab) activeTab.classList.add('active');
 
-            const client = new SARClient(baseUrl, apiKey);
-            const tray = document.getElementById(`tray-${id}`);
-            const btnRun = document.getElementById(`btn-run-${id}`);
-            const statusText = document.getElementById(`status-text-${id}`);
-            const progressFill = document.getElementById(`progress-${id}`);
+            document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
+            document.getElementById(`view-${tabName}`).style.display = 'block';
 
-            tray.style.display = 'block';
-            btnRun.disabled = true;
-            statusText.innerText = "Submitting job...";
-            progressFill.style.width = '10%';
+            if (tabName === 'discovery') loadCases();
+            if (tabName === 'audit-queue') loadAuditQueue();
+            if (tabName === 'history') loadHistory();
+        }
+
+        // --- DATA LOADERS ---
+        async function loadCases() {
+            const res = await fetch(`${API_URL}/cases`, { headers: { "X-API-Key": API_KEY } });
+            const data = await res.json();
+            const grid = document.getElementById('sim-grid');
+            grid.innerHTML = data.cases.map(c => `
+                <div class="sim-card">
+                    <div class="card-header"><strong>${c.account_number}</strong><span class="badge" style="${getRiskStyle(c.risk_rating)}">${c.risk_rating}</span></div>
+                    <h3>${c.customer_name}</h3>
+                    <p style="font-size:0.9rem; color:#666;">${c.typology}</p>
+                    <button class="btn" onclick="openCase('${c.account_number}')">Inspect & Generate</button>
+                </div>
+            `).join('');
+        }
+
+        async function loadAuditQueue() {
+            const res = await fetch(`${API_URL}/cases/history/submitted`, { headers: { "X-API-Key": API_KEY } });
+            const data = await res.json();
+            // In a real app, Auditor only sees VERIFIED. For demo, we filter or show all based on status.
+            const verified = data.filter(r => r.status === 'VERIFIED');
+            const list = document.getElementById('audit-list');
+            list.innerHTML = verified.length ? verified.map(r => `
+                <div class="tx-item" style="background:white; padding:15px;" onclick="openAuditReport('${r.sar_id}')">
+                    <div class="tx-details">
+                        <strong>${r.sar_id}</strong> - Case ${r.account_number}
+                        <div style="font-size:0.8rem; color:#666;">Verified by Officer at ${new Date(r.submitted_at).toLocaleString()}</div>
+                    </div>
+                    <button class="btn" style="width:auto;">Review & Finalize</button>
+                </div>
+            `).join('') : '<p style="text-align:center; padding:40px; color:#666;">No reports pending audit.</p>';
+        }
+
+        async function loadHistory() {
+            const res = await fetch(`${API_URL}/cases/history/submitted`, { headers: { "X-API-Key": API_KEY } });
+            const data = await res.json();
+            const list = document.getElementById('history-list');
+            list.innerHTML = data.map(r => `
+                <div class="tx-item" style="background:white; padding:15px;" onclick="viewFinalReport('${r.sar_id}')">
+                    <div class="tx-details">
+                        <strong>${r.sar_id}</strong> - ${r.account_number}
+                        <div style="font-size:0.8rem; color:#666;">Status: <span style="font-weight:bold; color:var(--barclays-blue);">${r.status}</span></div>
+                    </div>
+                    <button class="btn" style="width:auto;">View</button>
+                </div>
+            `).join('');
+        }
+
+        // --- SIDEBAR & GENERATION ---
+        async function openCase(accNum) {
+            document.getElementById('side-panel').classList.add('open');
+            const res = await fetch(`${API_URL}/cases/${accNum}`, { headers: { "X-API-Key": API_KEY } });
+            currentCase = await res.json();
+            const customer = currentCase.customer;
+            selectedTxIds = new Set(currentCase.transactions.map(t => t.transaction_id));
+
+            document.getElementById('panel-details').innerHTML = `
+                <div class="panel-section">
+                    <h3>Context Anonymization Active</h3>
+                    <p style="font-size:0.8rem; color:#666; background:#fff8e1; padding:8px; border-radius:4px;">
+                        PII (Name, ID) is stripped before AI analysis to ensure privacy.
+                    </p>
+                    <div class="info-grid">
+                        <span class="info-label">Acc Type:</span> <span>${customer.account_number.startsWith('IN') ? 'India Savings' : 'Standard'}</span>
+                        <span class="info-label">Risk Rating:</span> <span style="${getRiskStyle(customer.risk_rating)}">${customer.risk_rating}</span>
+                    </div>
+                </div>
+                <div class="panel-section">
+                    <h3>Transactions</h3>
+                    <ul class="tx-list">
+                        ${currentCase.transactions.map(tx => `
+                            <li class="tx-item ${tx.is_anomaly ? 'p-high' : ''}">
+                                <div class="tx-details">
+                                    <span class="tx-amount">₹${tx.amount.toLocaleString()}</span>
+                                    <span class="tx-date">${new Date(tx.timestamp).toLocaleDateString()} - ${tx.transaction_type}</span>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+            document.getElementById('action-panel').style.display = 'block';
+            document.getElementById('btn-generate').disabled = false;
+        }
+
+        async function triggerGeneration() {
+            const btn = document.getElementById('btn-generate');
+            const status = document.getElementById('generation-status');
+            btn.disabled = true;
+            status.innerHTML = `<span class="status-generating">Anonymizing & Running Deep AI Analysis...</span>`;
+
+            const filteredTx = currentCase.transactions.filter(t => selectedTxIds.has(t.transaction_id));
+            const requestPayload = {
+                customer: currentCase.customer,
+                transactions: filteredTx,
+                alerts: currentCase.alerts,
+                region: "IND",
+                typology: currentCase.typology
+            };
 
             try {
-                const response = await client.generateSAR(scenario.data);
-                const jobId = response.job_id;
-                statusText.innerText = "Job Queued (Async)";
-                progressFill.style.width = '20%';
-
-                pollJob(id, jobId, client);
+                const res = await fetch(`${API_URL}/generation/generate`, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json", "X-API-Key": API_KEY },
+                    body: JSON.stringify(requestPayload)
+                });
+                const job = await res.json();
+                pollJob(job.job_id);
             } catch (e) {
-                statusText.innerText = "Error: " + e.message;
-                statusText.style.color = 'var(--danger-red)';
-                btnRun.disabled = false;
+                status.innerHTML = `<span class="status-error">Generation Failed: ${e.message}</span>`;
+                btn.disabled = false;
             }
         }
 
-        function pollJob(id, jobId, client) {
-            const statusText = document.getElementById(`status-text-${id}`);
-            const progressFill = document.getElementById(`progress-${id}`);
-            const btnView = document.getElementById(`btn-view-${id}`);
-            const btnRun = document.getElementById(`btn-run-${id}`);
-
+        function pollJob(jobId) {
             const interval = setInterval(async () => {
-                try {
-                    const status = await client.getStatus(jobId);
-                    if (status.status === 'COMPLETED') {
-                        clearInterval(interval);
-                        statusText.innerText = "Completed!";
-                        statusText.style.color = 'var(--success-green)';
-                        progressFill.style.width = '100%';
-                        progressFill.style.background = 'var(--success-green)';
-                        btnView.style.display = 'block';
-                        btnRun.style.display = 'none';
-                        activeJobs.set(id, status.result);
-                    } else if (status.status === 'FAILED') {
-                        clearInterval(interval);
-                        statusText.innerText = "Failed: " + (status.error || 'Unknown error');
-                        statusText.style.color = 'var(--danger-red)';
-                    } else {
-                        statusText.innerText = status.message || "Processing...";
-                        progressFill.style.width = (status.progress || 30) + '%';
-                    }
-                } catch (e) {
-                    // Poll again next time
+                const res = await fetch(`${API_URL}/generation/status/${jobId}`, { headers: { "X-API-Key": API_KEY } });
+                const data = await res.json();
+                if (data.status === 'COMPLETED') {
+                    clearInterval(interval);
+                    document.getElementById('generation-status').innerHTML = `<span class="status-done">Analysis Finished.</span>`;
+                    document.getElementById('btn-generate').disabled = false;
+                    showOfficerReview(data.result);
                 }
             }, 2000);
         }
 
-        function runAllSimulations() {
-            scenarios.forEach(s => {
-                const btn = document.getElementById(`btn-run-${s.id}`);
-                if (!btn.disabled && btn.style.display !== 'none') {
-                    runSimulation(s.id);
-                }
-            });
-        }
-
-        function viewResult(id) {
-            const result = activeJobs.get(id);
-            const scenario = scenarios.find(s => s.id === id);
-            document.getElementById('result-title').innerText = `SAR Report: ${scenario.name}`;
-            document.getElementById('result-content').innerHTML = `<pre>${result.content}</pre>`;
+        // --- MODALS & WORKFLOWS ---
+        function showOfficerReview(result) {
+            activeSarId = result.sar_id;
+            document.getElementById('edit-area').value = result.content;
+            document.getElementById('edit-area').readOnly = false;
+            document.getElementById('modal-title').innerText = "Officer Review & Verification";
+            document.getElementById('modal-desc').innerText = "Step 1: Cleanup the AI narrative. Use the 'Verify' button to hand-off to Audit.";
+            document.getElementById('audit-trail').style.display = 'none';
+            document.getElementById('modal-actions').innerHTML = `
+                <button class="btn" style="background:#6c757d; width:auto;" onclick="closeModal()">Discard</button>
+                <button class="btn" style="background:var(--success-green); width:auto;" onclick="handleVerify()">Verify & Send to Audit</button>
+            `;
+            document.getElementById('review-modal').style.display = 'flex';
             document.getElementById('overlay').style.display = 'block';
-            document.getElementById('result-viewer').style.display = 'block';
         }
 
-        function closeResult() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('result-viewer').style.display = 'none';
+        async function openAuditReport(sarId) {
+            const res = await fetch(`${API_URL}/cases/history/${sarId}`, { headers: { "X-API-Key": API_KEY } });
+            const sar = await res.json();
+            activeSarId = sar.sar_id;
+            document.getElementById('edit-area').value = sar.edited_content || sar.content;
+            document.getElementById('edit-area').readOnly = true; // Auditor doesn't edit usually
+            document.getElementById('modal-title').innerText = "Auditor Final Approval";
+            document.getElementById('modal-desc').innerText = "Step 2: Review officer's verified report. Click 'Finalize' to archive for submission.";
+            document.getElementById('audit-trail').style.display = 'block';
+            document.getElementById('audit-trail').innerHTML = `<b>OFFICER VERIFIED:</b> ${sar.officer_id || 'System'} at ${new Date().toLocaleString()}`;
+            document.getElementById('modal-actions').innerHTML = `
+                <button class="btn" style="background:#6c757d; width:auto;" onclick="closeModal()">Back</button>
+                <button class="btn" style="background:var(--barclays-dark); width:auto;" onclick="handleFinalize()">Finalize Report</button>
+            `;
+            document.getElementById('review-modal').style.display = 'flex';
+            document.getElementById('overlay').style.display = 'block';
         }
 
-        window.onload = initDashboard;
+        async function viewFinalReport(sarId) {
+            const res = await fetch(`${API_URL}/cases/history/${sarId}`, { headers: { "X-API-Key": API_KEY } });
+            const sar = await res.json();
+            document.getElementById('edit-area').value = sar.edited_content || sar.content;
+            document.getElementById('edit-area').readOnly = true;
+            document.getElementById('modal-title').innerText = `Final Report: ${sarId}`;
+            document.getElementById('modal-desc').innerText = `Status: ${sar.status}`;
+            document.getElementById('audit-trail').style.display = 'block';
+            document.getElementById('audit-trail').innerHTML = `Officer: ${sar.officer_id} | Auditor: ${sar.auditor_id || 'Pending'}`;
+            document.getElementById('modal-actions').innerHTML = `<button class="btn" onclick="closeModal()">Close</button>`;
+            document.getElementById('review-modal').style.display = 'flex';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        async function handleVerify() {
+            const c = document.getElementById('edit-area').value;
+            // First save edits using POST body for reliability
+            await fetch(`${API_URL}/generation/save/${activeSarId}`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-API-Key": API_KEY
+                },
+                body: JSON.stringify({ edited_content: c })
+            });
+            // Then verify
+            await fetch(`${API_URL}/generation/verify/${activeSarId}?officer_id=${currentUser.username}`, { method: 'POST', headers: { "X-API-Key": API_KEY } });
+            alert("Sent to Auditor queue.");
+            closeModal();
+            loadCases();
+        }
+
+        async function handleFinalize() {
+            await fetch(`${API_URL}/generation/finalize/${activeSarId}?auditor_id=${currentUser.username}`, { method: 'POST', headers: { "X-API-Key": API_KEY } });
+            alert("Report Finalized and Archived.");
+            closeModal();
+            loadAuditQueue();
+        }
+
+        function closeModal() { document.getElementById('review-modal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
+        function closePanel() { document.getElementById('side-panel').classList.remove('open'); currentCase = null; }
+        function getRiskStyle(r) { return r === 'HIGH' ? 'background:#fee2e2;color:#991b1b;' : r === 'MEDIUM' ? 'background:#fff3cd;color:#856404;' : 'background:#d4edda;color:#155724;'; }
     </script>
 </body>
 

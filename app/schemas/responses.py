@@ -26,3 +26,15 @@ class BatchStatusResponse(BaseModel):
     status: str
     progress: int
     details: Dict[str, int]
+
+class Case(BaseModel):
+    account_number: str
+    customer_id: str
+    customer_name: str
+    risk_rating: str
+    alert_count: int
+    typology: str
+    status: str
+
+class CaseList(BaseModel):
+    cases: List[Case]

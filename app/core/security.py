@@ -39,4 +39,4 @@ class RateLimiter:
 
 # Dependencies to be used in routes
 verify_api_key = Depends(get_api_key)
-rate_limit_standard = Depends(RateLimiter(times=100, seconds=60)) # 100 req/min
+rate_limit_standard = Depends(RateLimiter(times=1000, seconds=60)) # 1000 req/min

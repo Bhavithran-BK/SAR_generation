@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.endpoints import generation, batch
+from app.api.endpoints import generation, batch, cases, auth
 # Ensure configs are loaded
 import app.core.configs.india 
 
@@ -35,6 +35,8 @@ app.add_middleware(
 
 app.include_router(generation.router, prefix="/api/v1/generation", tags=["Generation"])
 app.include_router(batch.router, prefix="/api/v1/batch", tags=["Batch Processing"])
+app.include_router(cases.router, prefix="/api/v1/cases", tags=["Case Management"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 
 @app.get("/health")
 async def health_check():

@@ -36,3 +36,6 @@ us_config = RegionConfig(
 )
 
 RegionFactory.register("US", us_config)
+
+# Import other regions to ensure registration
+from app.core.configs import india

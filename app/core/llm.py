@@ -5,7 +5,7 @@ import json
 class LLMEngine:
     def __init__(self):
         self.base_url = settings.OLLAMA_BASE_URL
-        self.model = "llama3" # or mistral, can be config
+        self.model = "llama3:latest" # Use specific tag
 
     async def generate(self, prompt: str, system_prompt: str = None) -> str:
         """
@@ -13,25 +13,42 @@ class LLMEngine:
         """
         url = f"{self.base_url}/api/generate"
         
-        full_prompt = prompt
-        if system_prompt:
-             # Basic template, can be improved
-             full_prompt = f"System: {system_prompt}\nUser: {prompt}"
-
+        # Standard Ollama JSON payload
         payload = {
             "model": self.model,
-            "prompt": full_prompt,
+            "prompt": prompt,
             "stream": False
         }
-        
+        if system_prompt:
+            payload["system"] = system_prompt
+
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client: # Lower timeout for demo
-                response = await client.post(url, json=payload)
+            # Use 127.0.0.1 for stability and longer timeout
+            # On Windows, localhost can sometimes be flaky with httpx
+            target_url = url.replace("localhost", "127.0.0.1")
+            
+            async with httpx.AsyncClient(timeout=300.0) as client:
+                print(f"Ollama Request: {self.model} at {target_url}", flush=True)
+                response = await client.post(target_url, json=payload)
                 response.raise_for_status()
                 result = response.json()
-                return result.get("response", "")
+                text = result.get("response", "")
+                print(f"Ollama Response (Proof Check): {text[:100]}...", flush=True)
+                return text
+                
         except Exception as e:
-             print(f"LLM Generation failed (using mock fallback): {e}")
-             return f"[MOCK NARRATIVE] Customer activity analyzed. Suspicious indicators found in transactions exceeding thresholds. Reporting recommended for {system_prompt}."
+            print(f"Ollama connection error (127.0.0.1): {e}", flush=True)
+            # Fallback to original base_url (localhost) as a second attempt
+            try:
+                async with httpx.AsyncClient(timeout=60.0) as client:
+                    print(f"Ollama Retry: {self.model} at {url}", flush=True)
+                    response = await client.post(url, json=payload)
+                    response.raise_for_status()
+                    result = response.json()
+                    return result.get("response", "")
+            except Exception as e2:
+                print(f"LLM Generation failed entirely: {e2}", flush=True)
+                # DO NOT RETURN MOCK DATA. The system should show error or stall.
+                raise Exception(f"AI Generation Failed: {str(e2)}. Ensure Ollama is running.")
 
 llm_engine = LLMEngine()

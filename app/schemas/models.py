@@ -9,6 +9,8 @@ class Customer(BaseModel):
     account_number: str
     risk_rating: str = "LOW"
     kyc_status: str = "VERIFIED"
+    occupation: str = "Retail Customer"
+    expected_monthly_turnover: float = 50000.0
 
 class Transaction(BaseModel):
     transaction_id: str
