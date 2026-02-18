@@ -604,30 +604,51 @@
             };
 
             try {
+                console.log("Submitting generation request...", requestPayload);
                 const res = await fetch(`${API_URL}/generation/generate`, {
                     method: 'POST',
                     headers: { "Content-Type": "application/json", "X-API-Key": API_KEY },
                     body: JSON.stringify(requestPayload)
                 });
+
                 const job = await res.json();
-                pollJob(job.job_id);
+                console.log("Generation response:", job);
+
+                if (res.ok && job.job_id) {
+                    pollJob(job.job_id);
+                } else {
+                    const errorMsg = job.detail ? JSON.stringify(job.detail) : (job.message || "Unknown error");
+                    throw new Error(errorMsg);
+                }
             } catch (e) {
-                status.innerHTML = `<span class="status-error">Generation Failed: ${e.message}</span>`;
+                console.error("Generation Trigger Failed:", e);
+                status.innerHTML = `<span class="status-error">Submission Failed: ${e.message}</span>`;
                 btn.disabled = false;
             }
         }
 
         function pollJob(jobId) {
+            console.log("Starting polling for Job ID:", jobId);
             const interval = setInterval(async () => {
-                const res = await fetch(`${API_URL}/generation/status/${jobId}`, { headers: { "X-API-Key": API_KEY } });
-                const data = await res.json();
-                if (data.status === 'COMPLETED') {
-                    clearInterval(interval);
-                    document.getElementById('generation-status').innerHTML = `<span class="status-done">Analysis Finished.</span>`;
-                    document.getElementById('btn-generate').disabled = false;
-                    showOfficerReview(data.result);
+                try {
+                    const res = await fetch(`${API_URL}/generation/status/${jobId}`, { headers: { "X-API-Key": API_KEY } });
+                    const data = await res.json();
+                    console.log(`Polling status for ${jobId}:`, data.status);
+
+                    if (data.status === 'COMPLETED') {
+                        clearInterval(interval);
+                        document.getElementById('generation-status').innerHTML = `<span class="status-done">Analysis Finished.</span>`;
+                        document.getElementById('btn-generate').disabled = false;
+                        showOfficerReview(data.result);
+                    } else if (data.status === 'FAILED') {
+                        clearInterval(interval);
+                        document.getElementById('generation-status').innerHTML = `<span class="status-error">AI Task Failed: ${data.error || 'Unknown Error'}</span>`;
+                        document.getElementById('btn-generate').disabled = false;
+                    }
+                } catch (e) {
+                    console.error("Polling Error:", e);
                 }
-            }, 2000);
+            }, 3000);
         }
 
         // --- MODALS & WORKFLOWS ---

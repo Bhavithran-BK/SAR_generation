@@ -177,7 +177,7 @@ async def get_case_details(account_number: str, db: AsyncSession = Depends(get_d
     expected_turnover = 0.0
     
     if transactions:
-        customer_name = transactions[0].get("description", "Unknown")
+        customer_name = transactions[0].get("description") or "Unknown Customer"
         
         # Refined Classification Logic
         is_receiving_salary = any(

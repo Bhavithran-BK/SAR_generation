@@ -27,7 +27,7 @@ class LLMEngine:
             # On Windows, localhost can sometimes be flaky with httpx
             target_url = url.replace("localhost", "127.0.0.1")
             
-            async with httpx.AsyncClient(timeout=300.0) as client:
+            async with httpx.AsyncClient(timeout=600.0) as client:
                 print(f"Ollama Request: {self.model} at {target_url}", flush=True)
                 response = await client.post(target_url, json=payload)
                 response.raise_for_status()
